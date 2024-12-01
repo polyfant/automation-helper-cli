@@ -146,4 +146,49 @@ var Commands = map[string]ABBCommand{
 			"- Maintains original orientation\n" +
 			"- Common use: Pattern movements, approach positions",
 	},
+	"pulse_do": {
+		Name:    "PulseDO",
+		Syntax:  "PulseDO Signal [\\High] [\\Time:=0.1]",
+		Example: "PulseDO do_Reset;         ! Quick pulse with default time\nPulseDO do_Trigger \\Time:=0.5;  ! 0.5s pulse",
+		Description: "Generates a pulse on digital output signal.\n" +
+			"- Default pulse time is 0.1 seconds\n" +
+			"- \\High keeps signal high after pulse\n" +
+			"- Common use: Reset signals, triggers",
+	},
+	"relative_pos": {
+		Name:    "RelTool",
+		Syntax:  "RelTool [\\Tool] Point [\\Dx] [\\Dy] [\\Dz] [\\Rx] [\\Ry] [\\Rz]",
+		Example: "MoveL RelTool(pCurrent, 0, 0, 50), v100, fine, tool1;  ! Move up 50mm\nMoveL RelTool(pCurrent \\Dx:=100), v100, z10, tool1;  ! Move in X",
+		Description: "Create position relative to tool coordinate system.\n" +
+			"- Dx,Dy,Dz: Translation in mm\n" +
+			"- Rx,Ry,Rz: Rotation in degrees\n" +
+			"- Common use: Tool-relative movements",
+	},
+	"error_recovery": {
+		Name:    "ERROR",
+		Syntax:  "ERROR\n    [instruction]\n    ...\nENDERROR",
+		Example: "ERROR\n    StopMove;         ! Stop robot\n    SetDO do_Error, 1;  ! Signal error\n    Stop;              ! Stop program\nENDERROR",
+		Description: "Error recovery handler. Executes when error occurs.\n" +
+			"- Place in TRAP routines\n" +
+			"- Use with RAISE to trigger\n" +
+			"- Common use: Error handling, safety",
+	},
+	"string_handling": {
+		Name:    "StrMatch",
+		Syntax:  "StrMatch String1 Pattern [\\MatchLength]",
+		Example: "IF StrMatch(partID, \"A*\") THEN\n    ! Handle A-series parts\nENDIF",
+		Description: "Pattern matching for strings.\n" +
+			"- Supports wildcards (* and ?)\n" +
+			"- Case sensitive\n" +
+			"- Common use: Part identification",
+	},
+	"interrupt": {
+		Name:    "CONNECT",
+		Syntax:  "CONNECT Signal WITH Trap_Routine",
+		Example: "CONNECT di_Emergency WITH Emergency_Stop;\n! In TRAP:\nTRAP Emergency_Stop\n    StopMove;\n    Stop;\nENDTRAP",
+		Description: "Connect interrupt signal to trap routine.\n" +
+			"- Executes trap immediately on signal\n" +
+			"- Multiple connects possible\n" +
+			"- Common use: Emergency stops, monitoring",
+	},
 }

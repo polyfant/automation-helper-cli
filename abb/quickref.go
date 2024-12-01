@@ -233,7 +233,7 @@ ENDMODULE`,
                FOR col FROM 1 TO 3 DO
                    current_pos := Offs(base_pos, 
                        col*100, row*100, layer*50);
-                   MoveL current_pos, v500, z10, tool1;
+                   MoveL current_pos, v500, fine, tool1;
                ENDFOR
            ENDFOR
        ENDFOR
@@ -252,4 +252,132 @@ ENDMODULE`,
            TPWrite "Object found!";
        ENDIF
    ENDPROC`,
+
+	"interrupts": `Interrupt Handling Guide:
+1. Basic Interrupt Setup:
+   CONNECT signal WITH trap_routine;
+   
+2. Trap Structure:
+   TRAP trap_routine
+       ! Your code here
+   ENDTRAP
+   
+3. Common Patterns:
+   ! Emergency stop
+   CONNECT di_Emergency WITH Emergency_Stop;
+   TRAP Emergency_Stop
+       StopMove;
+       SetDO do_Error, 1;
+       Stop;
+   ENDTRAP
+   
+   ! Part detection
+   CONNECT di_PartPresent WITH Handle_Part;
+   TRAP Handle_Part
+       := CRobT();    ! Get position
+       ! Handle part
+   ENDTRAP`,
+
+	"program_structure": `Program Structure Guide:
+1. Main Program:
+   MODULE MainModule
+       ! Constants
+       CONST robtarget pHome := [...];
+       
+       ! Variables
+       VAR num counter := 0;
+       PERS tooldata currentTool := [...];
+       
+       ! Main procedure
+       PROC main()
+           ! Initialize
+           ! Main loop
+       ENDPROC
+   ENDMODULE
+
+2. Best Practices:
+   - Group related variables
+   - Use meaningful names
+   - Comment complex logic
+   - Structure in modules
+
+3. Common Structure:
+   ! Initialize
+   TPErase;
+   TPWrite "Program starting...";
+   MoveJ pHome, v1000, z50, tool0;
+   
+   ! Main loop
+   WHILE running DO
+       ! Process logic
+   ENDWHILE`,
+
+	"motion_patterns": `Common Motion Patterns:
+1. Pick and Place:
+   MoveJ pApproach, v1000, z10, tool1;    ! Approach
+   MoveL pPick, v100, fine, tool1;        ! Pick
+   SetDO do_Gripper, 1;                   ! Grip
+   WaitDI di_GripperClosed, 1;            ! Verify
+   MoveL pApproach, v100, z10, tool1;     ! Retract
+   
+2. Search Pattern:
+   SearchL \\Stop:=di_Contact, pSearch, v100, tool1;
+   pos := CRobT();                        ! Get position
+   
+3. Circular Process:
+   MoveL pStart, v100, fine, tool1;
+   SetDO do_Process, 1;                   ! Start process
+   MoveC pMid, pEnd, v100, z1, tool1;     ! Circular move
+   SetDO do_Process, 0;                   ! End process
+
+4. Palletizing:
+   FOR i FROM 1 TO rows DO
+       FOR j FROM 1 TO cols DO
+           pCurrent := Offs(pBase,i*dx,j*dy,0);
+           MoveL pCurrent, v500, fine, tool1;
+       ENDFOR
+   ENDFOR`,
+
+	"calibration": `Calibration and Setup Guide:
+1. Tool Calibration:
+   - Use 4-point method
+   - Points should form pyramid
+   - Verify with circular movement
+
+2. Work Object Calibration:
+   - Use 3-point method
+   - First point = origin
+   - Second point = X direction
+   - Third point = Y direction (approx)
+
+3. Best Practices:
+   - Calibrate at operating temperature
+   - Use fine points
+   - Verify with test movements
+   - Document calibration data`,
+
+	"safety": `Safety Programming Guide:
+1. Emergency Stops:
+   - Use interrupts for immediate response
+   - Always stop motion first
+   - Signal error state
+   - Safe position if possible
+
+2. Motion Safety:
+   - Use collision detection
+   - Check workspace limits
+   - Verify speed in human zones
+   - Use safe zones when needed
+
+3. Process Safety:
+   - Verify tool state
+   - Check process conditions
+   - Monitor process signals
+   - Handle timeouts properly
+
+4. Error Recovery:
+   - Safe error states
+   - Clear error conditions
+   - Restart procedures
+   - Operator confirmation`,
 }
