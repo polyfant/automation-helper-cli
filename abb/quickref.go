@@ -84,26 +84,68 @@ Usage Tips:
 - Use z10-z50 for fast movements
 - Larger zones = smoother motion but less accuracy`,
 
-	"io_handling": `I/O Handling Reference:
+	"io_handling": `I/O Handling Guide:
 Digital I/O:
-1. Outputs (DO):
-   SetDO do_name, value;      | Example: SetDO do_Gripper, 1;
-   PulseDO do_name;           | Example: PulseDO do_Reset;
-   
-2. Inputs (DI):
-   value := GetDI di_name;    | Example: IF GetDI di_PartPresent = 1 THEN
-   WaitDI di_name, value;     | Example: WaitDI di_Ready, 1;
-   
-Analog I/O:
-1. Outputs (AO):
-   SetAO ao_name, value;      | Example: SetAO ao_Speed, 50.5;
-   
-2. Inputs (AI):
-   value := GetAI ai_name;    | Example: pressure := GetAI ai_Pressure;
+1. Digital Outputs (DO)
+   - SetDO signal, value;    ! Set output
+   - PulseDO signal;         ! Quick pulse output
+   Example:
+   SetDO do_Gripper, 1;      ! Turn on gripper
+   PulseDO do_Reset;         ! Pulse reset signal
 
-Group I/O:
-   SetGO go_name, value;      | Example: SetGO go_Status, 2;
-   value := GetGI gi_name;    | Example: mode := GetGI gi_OpMode;`,
+2. Digital Inputs (DI)
+   - WaitDI signal, value;   ! Wait for input
+   - IsDI(signal);           ! Check input state
+   Example:
+   WaitDI di_PartPresent, 1;  ! Wait for part
+   IF IsDI(di_Error) THEN     ! Check error signal
+       ! Handle error
+   ENDIF
+
+Analog I/O:
+1. Analog Outputs (AO)
+   - SetAO signal, value;    ! Set analog value
+   Example:
+   SetAO ao_Speed, 75;       ! Set to 75%
+   SetAO ao_Voltage, v_ref;  ! Set from variable
+
+2. Analog Inputs (AI)
+   - AInput(signal);         ! Read analog input
+   Example:
+   VAR num pressure;
+   pressure := AInput(ai_Pressure);
+
+Best Practices:
+1. Signal Naming:
+   - do_* for digital outputs
+   - di_* for digital inputs
+   - ao_* for analog outputs
+   - ai_* for analog inputs
+
+2. Error Handling:
+   - Use \MaxTime with WaitDI
+   - Always check signal ranges
+   Example:
+   WaitDI di_Ready, 1 \MaxTime:=5;  ! Timeout after 5s
+
+3. Signal Groups:
+   - Group related signals
+   - Use consistent naming
+   Example:
+   do_GripperOpen
+   do_GripperClose
+   di_GripperOpened
+   di_GripperClosed
+
+4. Common Patterns:
+   ! Gripper control with feedback
+   SetDO do_GripperClose, 1;
+   WaitDI di_GripperClosed, 1 \MaxTime:=2;
+   
+   ! Process control
+   SetAO ao_Power, 80;
+   WaitTime 0.5;
+   SetDO do_ProcessStart, 1;`,
 
 	"error_handling": `Error Handling Guide:
 1. Basic Error Handler:
